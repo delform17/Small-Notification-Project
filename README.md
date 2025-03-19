@@ -1,2 +1,7 @@
 # Small-Notification-Project
-Here is a small app provide looking for free bus place or example
+
+# Title of Project : 
+**Free Places Scanner**
+
+# Description :
+**Repository which You explore contain small applicaton to control inform.**
