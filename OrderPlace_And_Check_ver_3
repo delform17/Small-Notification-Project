@@ -1,0 +1,206 @@
+import React  from 'react';
+import ReactDOM from 'react-dom/client';
+import { useState,useEffect } from "react";
+
+let randomNum = null;
+let maxLOfArr = null;
+let countTheRecord = 0;
+
+const styles = {
+	
+	titled : {
+		fontSize : '25px',
+		fontFamily: "Open Sans, Arial, Sans Serif", 
+		color : 'green'
+		//fontStyle : 'oblique'
+	},
+	
+	listed : {
+        
+        fontSize : '14px',
+		fontFamily: "Open Sans, Arial, Sans Serif", 
+		listStyleType : 'square',
+		color : 'white',
+	},
+
+    action : {
+        padding: '10px 30px',
+        cursor: 'pointer',
+        opacity: 0.6,
+        background: 'white',
+        border: 0,
+        outline: 0,
+        borderBottom: '2px solid transparent'
+    },
+
+    box : {
+        width: '600px',
+        height : '500px',
+        align: 'center',
+        margin: '0 auto',
+        padding: '0 auto',
+    }
+
+}
+
+const listsOfPassangersSits = [
+        
+    {id: 1,bus_number : 110,PlaceID: 1915,},
+    {id: 2,bus_number : 115,PlaceID: 1920,},
+    {id: 3,bus_number : 121,PlaceID: 1925,},
+    {id: 4,bus_number : 130,PlaceID: 1930,},
+    {id: 5,bus_number : 140,PlaceID: 1935,},
+    {id: 6,bus_number : 152,PlaceID: 1940,},
+    {id: 7,bus_number : 161,PlaceID: 1945,},
+    {id: 8,bus_number : 170,PlaceID: 1950,},
+];
+
+maxLOfArr = listsOfPassangersSits.length;
+
+function UpdatesPlaces_CheckAvailable_InformMe(){
+
+    // ----------------Aktualizacja rekordow ----------------------------
+
+/* Status tablicy danych */
+const [myRow, setMyRow] = useState(listsOfPassangersSits);
+
+
+function setRandomNumber(){
+    randomNum = Math.floor(Math.random() * 5);
+    
+}
+
+function UpdateSomeRow(){
+    let countTheRecord = 0;
+    const countAndUpdate = myRow.map(actualRow => {
+        countTheRecord = countTheRecord + 1;
+        
+        if(countTheRecord === maxLOfArr){
+            console.log("Found end of array");
+        if(!isNaN(actualRow.PlaceID)){             
+             
+            setRandomNumber();
+            console.log("Place is enable");
+            console.log(actualRow.PlaceID+' '+myRow.PlaceID);
+
+            
+            return {...actualRow, PlaceID : ''}
+        }
+        }
+    
+        
+        return actualRow;
+});
+
+maxLOfArr =  maxLOfArr - randomNum; 
+
+if(maxLOfArr < 0){
+        maxLOfArr = listsOfPassangersSits.length;
+}
+
+setMyRow(countAndUpdate);
+console.log(maxLOfArr);
+}
+
+
+//----------------------- Wyszukiwanie wolnych miejsc --------------------
+
+function findFreePlaces(){
+
+    const requirePlaces = myRow.map( item => {
+        if(item.PlaceID === ''){
+            freePlaceCounter++;
+            if(freePlaceCounter === 3){
+               
+                changePresentState();
+                clearInterval(intervalSession);
+            }
+        }
+    });
+    freePlaceCounter = 0;
+}
+
+//----------------------- Wyswietlani powiadomenia o wolnych miejscach ---------
+
+
+const [newComponentState, setNewComponentState] = useState(0);
+
+function changePresentState(){
+    
+	setNewComponentState(1);
+	//Dodanie ograniczenia czasowego 
+	setTimeOut(() => {
+		setNewComponentState(0)
+	},4000);
+	
+  
+}
+
+//--------------------- Nowe okno z powiadomieniem ----------------------------
+
+const ExtendedComponent = ({switchOffComponent}) => {
+   
+    
+        return(
+            
+            <div className="newWindow">
+                <p>We've found require amount of places</p>
+				<p>amount places :+{freePlaceCounter}</p>
+                <button onClick={switchOffComponent}>Cancel</button>
+            </div>
+            
+            
+        )
+    }
+
+
+//------------------- SPRAWDZANIE WOLNYCH MIEJSC ----------------
+
+function checkAvailablePlaces(){
+
+   const requirePlaces = myRow.map( item => {
+        if(item.PlaceID === ''){
+            freePlaceCounter++;
+            if(freePlaceCounter === 3){
+                
+                setNewComponentState(1);
+                //clearInterval(intervalSession);
+            }
+        }
+    });
+    freePlaceCounter = 0;
+    
+}
+
+useEffect(() => {
+    intervalSession = setInterval(() => {
+    
+        
+        checkAvailablePlaces();
+        
+    }, 5000);
+},[myRow]);
+
+return(
+        <div styl={styles.box}>
+			<h1 style={styles.titled}>Click on button below and check free places</h1>
+               <button onClick={UpdateSomeRow} style={styles.action}>Make Place Free</button>
+               { newComponentState && <ExtendedComponent switchOffComponent={() => setNewComponentState(0)} />}
+                <ul >
+                    <li style={styles.listed}>{
+                    myRow.map((row, index) => (
+                        <li key={index}>
+                            <span> Bus number : {row.bus_number}</span>
+                            <span> PlaceID : {row.PlaceID}</span>
+                        </li>
+                        
+                        ))
+                    }</li>
+                
+                </ul>
+            </div>
+        )
+}
+
+const execute = ReactDOM.createRoot(document.getElementById(('root')));
+execute.render(<UpdatesPlaces_CheckAvailable_InformMe />)
